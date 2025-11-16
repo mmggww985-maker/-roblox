@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Roblox Player Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 1.8em;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .stat-item {
+            background: #f0f0f0;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .stat-number {
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .reset-info {
+            color: #666;
+            font-size: 0.9em;
+            text-align: right;
+        }
+
+        .reset-timer {
+            font-weight: 700;
+            color: #ef4444;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-refresh {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-refresh:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .players-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .players-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .player-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .player-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .player-item.offline {
+            opacity: 0.6;
+        }
+
+        .player-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .avatar-container {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .player-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            border: 3px solid #667eea;
+        }
+
+        .status-dot {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .status-dot.online {
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.offline {
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .player-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .player-name {
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #667eea;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .player-name:hover {
+            text-decoration: underline;
+        }
+
+        .player-team {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .player-time {
+            color: #999;
+            font-size: 0.85em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .menu-item {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            background: #f8f9fa;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .menu-item-title {
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .menu-item-desc {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .action-form {
+            display: none;
+        }
+
+        .action-form.show {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .current-team-info {
+            background: #f0f9ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            color: #0369a1;
+            font-weight: 600;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #4b5563;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 2px solid #34d399;
+            font-weight: 600;
+        }
+
+        .back-btn {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .back-btn:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .players-list {
+                grid-template-columns: 1fr;
+            }
+
+            .header-stats {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>🎮 ระบบจัดการผู้เล่น Roblox</h1>
+                <div class="reset-info">
+                    รีเซ็ตรายชื่อใน:<br>
+                    <span class="reset-timer" id="resetTimer">--:--:--</span>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    👥 ทั้งหมด: <span class="stat-number" id="totalPlayers">0</span>
+                </div>
+                <div class="stat-item">
+                    🟢 ออนไลน์: <span class="stat-number" id="onlinePlayers">0</span>
+                </div>
+                <div class="stat-item">
+                    🔴 ออฟไลน์: <span class="stat-number" id="offlinePlayers">0</span>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn-refresh" onclick="refreshPlayers()">
+                    <span>🔄</span> รีเฟรช
+                </button>
+            </div>
+        </div>
+
+        <div class="players-section">
+            <div class="section-header">
+                <div class="section-title">👥 รายชื่อผู้เล่น</div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterPlayers('all')">ทั้งหมด</button>
+                    <button class="filter-btn" onclick="filterPlayers('online')">🟢 ออนไลน์</button>
+                    <button class="filter-btn" onclick="filterPlayers('offline')">🔴 ออฟไลน์</button>
+                </div>
+            </div>
+            <div class="players-list" id="playersList">
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <h3>ไม่มีผู้เล่นในเซิร์ฟเวอร์</h3>
+                    <p>รอผู้เล่นเข้าเกม...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal จัดการผู้เล่น -->
+    <div id="menuModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalPlayerName">จัดการผู้เล่น</div>
+            <div class="modal-body" id="modalBody">
+                <div id="menuOptions">
+                    <div class="menu-item" onclick="showKickForm()">
+                        <div class="menu-item-title">👢 เตะผู้เล่น</div>
+                        <div class="menu-item-desc">เตะผู้เล่นออกจากเกม</div>
+                    </div>
+                    <div class="menu-item" onclick="showTeamForm()">
+                        <div class="menu-item-title">🔄 เปลี่ยนทีม</div>
+                        <div class="menu-item-desc">เปลี่ยนทีมของผู้เล่น</div>
+                    </div>
+                    <button class="btn btn-cancel" style="width: 100%; margin-top: 10px;" onclick="closeModal()">ปิด</button>
+                </div>
+
+                <!-- Form เตะผู้เล่น -->
+                <div id="kickForm" class="action-form">
+                    <button class="back-btn" onclick="showMenu()">← กลับ</button>
+                    <div id="kickSuccess" class="success-message" style="display: none;">
+                        ✅ เตะผู้เล่นสำเร็จ!
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">⚠️ เตะผู้เล่น: <span id="kickPlayerName"></span></label>
+                        <label class="form-label">กรุณาใส่เหตุผล:</label>
+                        <textarea id="kickReason" class="form-input form-textarea" placeholder="เหตุผลที่เตะผู้เล่น..."></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-cancel" onclick="showMenu()">ยกเลิก</button>
+                        <button class="btn btn-danger" onclick="confirmKick()">เตะผู้เล่น</button>
+                    </div>
+                </div>
+
+                <!-- Form เปลี่ยนทีม -->
+                <div id="teamForm" class="action-form">
+                    <button class="back-btn" onclick="showMenu()">← กลับ</button>
+                    <div id="teamSuccess" class="success-message" style="display: none;">
+                        ✅ เปลี่ยนทีมสำเร็จ!
+                    </div>
+                    <div class="current-team-info" id="currentTeamInfo">
+                        ทีมปัจจุบัน: --
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">เลือกทีมใหม่:</label>
+                        <select id="teamSelect" class="form-select">
+                            <option value="">-- กรุณาเลือกทีม --</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-cancel" onclick="showMenu()">ยกเลิก</button>
+                        <button class="btn btn-primary" onclick="confirmTeamChange()">เปลี่ยนทีม</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let players = {};
+        let teams = [];
+        let currentPlayerId = null;
+        let currentFilter = 'all';
+
+        // ตั้งค่าการเชื่อมต่อ
+        const API_URL = 'YOUR_SERVER_URL_HERE'; // แก้ไข URL ตรงนี้
+
+        // เชื่อมต่อ WebSocket (ถ้ามี)
+        let ws = null;
+        function connectWebSocket() {
+            try {
+                ws = new WebSocket(API_URL.replace('http', 'ws'));
+                
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    handleServerMessage(data);
+                };
+
+                ws.onerror = () => {
+                    console.log('ใช้โหมด Polling');
+                    startPolling();
+                };
+            } catch (error) {
+                startPolling();
+            }
+        }
+
+        // Polling
+        function startPolling() {
+            setInterval(fetchPlayers, 3000);
+        }
+
+        async function fetchPlayers() {
+            try {
+                const response = await fetch(API_URL + '/api/players');
+                const data = await response.json();
+                if (data.players) {
+                    players = {};
+                    data.players.forEach(p => {
+                        players[p.userId] = p;
+                    });
+                    renderPlayers();
+                }
+            } catch (error) {
+                console.log('Polling error:', error);
+            }
+        }
+
+        function handleServerMessage(data) {
+            if (data.type === 'PLAYER_JOINED') {
+                addPlayer(data.player);
+            } else if (data.type === 'PLAYER_LEFT') {
+                updatePlayerStatus(data.userId, false);
+            } else if (data.type === 'TEAMS_UPDATE') {
+                updateTeams(data.teams);
+            } else if (data.type === 'PLAYER_UPDATE') {
+                updatePlayer(data.player);
+            } else if (data.type === 'RESET_PLAYERS') {
+                resetPlayers();
+            }
+        }
+
+        function addPlayer(player) {
+            players[player.userId] = {
+                ...player,
+                online: true
+            };
+            renderPlayers();
+        }
+
+        function updatePlayerStatus(userId, online) {
+            if (players[userId]) {
+                players[userId].online = online;
+                renderPlayers();
+            }
+        }
+
+        function updatePlayer(player) {
+            if (players[player.userId]) {
+                players[player.userId] = {
+                    ...players[player.userId],
+                    ...player
+                };
+                renderPlayers();
+            }
+        }
+
+        function updateTeams(newTeams) {
+            teams = newTeams;
+            const select = document.getElementById('teamSelect');
+            select.innerHTML = '<option value="">-- กรุณาเลือกทีม --</option>' +
+                teams.map(team => `<option value="${team}">${team}</option>`).join('');
+        }
+
+        function resetPlayers() {
+            players = {};
+            renderPlayers();
+        }
+
+        function updateStats() {
+            const playerList = Object.values(players);
+            const online = playerList.filter(p => p.online).length;
+            const offline = playerList.length - online;
+
+            document.getElementById('totalPlayers').textContent = playerList.length;
+            document.getElementById('onlinePlayers').textContent = online;
+            document.getElementById('offlinePlayers').textContent = offline;
+        }
+
+        function filterPlayers(filter) {
+            currentFilter = filter;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+  
