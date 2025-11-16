@@ -1,678 +1,511 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 Roblox Player Management</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 15px;
-        }
-
-        /* หน้า Login */
-        .login-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-        }
-
-        .login-box h1 {
-            color: #667eea;
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-
-        .login-box p {
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .discord-btn {
-            background: #5865F2;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
-        }
-
-        .discord-btn:hover {
-            background: #4752C4;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(88, 101, 242, 0.4);
-        }
-
-        /* หน้ารอการอนุมัติ */
-        .pending-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .pending-box {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
-        }
-
-        .pending-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            animation: spin 2s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .pending-box h2 {
-            color: #667eea;
-            font-size: 1.8em;
-            margin-bottom: 15px;
-        }
-
-        .pending-box p {
-            color: #666;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .user-info {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin-bottom: 10px;
-        }
-
-        .logout-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-
-        .logout-btn:hover {
-            background: #dc2626;
-        }
-
-        /* เมนูผู้ใช้มุมขวาบน */
-        .user-menu {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-        }
-
-        .user-avatar-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 3px solid white;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: all 0.3s;
-            object-fit: cover;
-        }
-
-        .user-avatar-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-        }
-
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 60px;
-            right: 0;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            min-width: 250px;
-            overflow: hidden;
-        }
-
-        .dropdown-menu.show {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .dropdown-header {
-            background: #667eea;
-            color: white;
-            padding: 15px;
-            font-weight: 600;
-        }
-
-        .dropdown-item {
-            padding: 15px;
-            cursor: pointer;
-            transition: background 0.3s;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .dropdown-item:hover {
-            background: #f8f9fa;
-        }
-
-        .dropdown-item:last-child {
-            border-bottom: none;
-        }
-
-        /* Modal อนุมัติผู้ใช้ */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        }
-
-        .modal-header {
-            background: #667eea;
-            color: white;
-            padding: 20px;
-            border-radius: 15px 15px 0 0;
-            font-size: 1.3em;
-            font-weight: 700;
-        }
-
-        .modal-body {
-            padding: 25px;
-        }
-
-        .pending-user-item {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .pending-user-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-        }
-
-        .pending-user-info {
-            flex: 1;
-        }
-
-        .pending-user-name {
-            font-weight: 700;
-            font-size: 1.1em;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .pending-user-email {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .pending-user-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-approve {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-approve:hover {
-            background: #059669;
-        }
-
-        .btn-reject {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-reject:hover {
-            background: #dc2626;
-        }
-
-        .empty-pending {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-
-        .btn-close {
-            background: #6b7280;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 15px;
-        }
-
-        .btn-close:hover {
-            background: #4b5563;
-        }
-
-        /* หน้าหลัก */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding-top: 80px;
-        }
-
-        .header {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            color: #667eea;
-            font-size: 1.8em;
-            margin-bottom: 15px;
-        }
-
-        .stats {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .stat-item {
-            background: #f0f0f0;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
-        .stat-number {
-            color: #667eea;
-            font-size: 1.3em;
-        }
-
-        .players-section {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .section-title {
-            color: #667eea;
-            font-size: 1.5em;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .players-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-        }
-
-        .player-item {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-
-        .player-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            border-color: #667eea;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-
-        /* UI แจ้งเตือน */
-        .notification {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            z-index: 2000;
-            min-width: 300px;
-            max-width: 90%;
-            display: none;
-            animation: slideIn 0.3s;
-        }
-
-        .notification.show {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from { 
-                transform: translate(-50%, -60%);
-                opacity: 0;
-            }
-            to { 
-                transform: translate(-50%, -50%);
-                opacity: 1;
-            }
-        }
-
-        .notification-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1999;
-            display: none;
-        }
-
-        .notification-overlay.show {
-            display: block;
-        }
-
-        .notification-icon {
-            font-size: 3em;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .notification-title {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: #333;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .notification-message {
-            color: #666;
-            text-align: center;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .notification-close {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s;
-        }
-
-        .notification-close:hover {
-            background: #5568d3;
-        }
-
-        .notification.success .notification-icon {
-            color: #10b981;
-        }
-
-        .notification.error .notification-icon {
-            color: #ef4444;
-        }
-
-        .notification.warning .notification-icon {
-            color: #f59e0b;
-        }
-
-        .notification.info .notification-icon {
-            color: #3b82f6;
-        }
-
-        @media (max-width: 768px) {
-            .pending-user-item {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .pending-user-actions {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .notification {
-                padding: 25px;
-                min-width: 280px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- หน้า Login -->
-    <div id="loginPage" class="login-container">
-        <div class="login-box">
-            <h1>🎮 Roblox Player Management</h1>
-            <p>กรุณาเข้าสู่ระบบด้วย Discord เพื่อเริ่มใช้งาน</p>
-            <button class="discord-btn" onclick="loginWithDiscord()">
-                <svg width="24" height="24" viewBox="0 0 71 55" fill="none">
-                    <path d="M60.1045 4.8978C55.5792 2.8214 50.7265 1.2916 45.6527 0.41542C45.5603 0.39851 45.468 0.440769 45.4204 0.525289C44.7963 1.6353 44.105 3.0834 43.6209 4.2216C38.1637 3.4046 32.7345 3.4046 27.3892 4.2216C26.905 3.0581 26.1886 1.6353 25.5617 0.525289C25.5141 0.443589 25.4218 0.40133 25.3294 0.41542C20.2584 1.2888 15.4057 2.8186 10.8776 4.8978C10.8384 4.9147 10.8048 4.9429 10.7825 4.9795C1.57795 18.7309 -0.943561 32.1443 0.293408 45.3914C0.299005 45.4562 0.335386 45.5182 0.385761 45.5576C6.45866 50.0174 12.3413 52.7249 18.1147 54.5195C18.2071 54.5477 18.305 54.5139 18.3638 54.4378C19.7295 52.5728 20.9469 50.6063 21.9907 48.5383C22.0523 48.4172 21.9935 48.2735 21.8676 48.2256C19.9366 47.4931 18.0979 46.6 16.3292 45.5858C16.1893 45.5041 16.1781 45.304 16.3068 45.2082C16.679 44.9293 17.0513 44.6391 17.4067 44.3461C17.471 44.2926 17.5606 44.2813 17.6362 44.3151C29.2558 49.6202 41.8354 49.6202 53.3179 44.3151C53.3935 44.2785 53.4831 44.2898 53.5502 44.3433C53.9057 44.6363 54.2779 44.9293 54.6529 45.2082C54.7816 45.304 54.7732 45.5041 54.6333 45.5858C52.8646 46.6197 51.0259 47.4931 49.0921 48.2228C48.9662 48.2707 48.9102 48.4172 48.9718 48.5383C50.038 50.6034 51.2554 52.5699 52.5959 54.435C52.6519 54.5139 52.7526 54.5477 52.845 54.5195C58.6464 52.7249 64.529 50.0174 70.6019 45.5576C70.6551 45.5182 70.6887 45.459 70.6943 45.3942C72.1747 30.0791 68.2147 16.7757 60.1968 4.9823C60.1772 4.9429 60.1437 4.9147 60.1045 4.8978ZM23.7259 37.3253C20.2276 37.3253 17.3451 34.1136 17.3451 30.1693C17.3451 26.225 20.1717 23.0133 23.7259 23.0133C27.308 23.0133 30.1626 26.2532 30.1066 30.1693C30.1066 34.1136 27.28 37.3253 23.7259 37.3253ZM47.3178 37.3253C43.8196 37.3253 40.9371 34.1136 40.9371 30.1693C40.9371 26.225 43.7636 23.0133 47.3178 23.0133C50.9 23.0133 53.7545 26.2532 53.6986 30.1693C53.6986 34.1136 50.9 37.3253 47.3178 37.3253Z" fill="white"/>
-                </svg>
-                เข้าสู่ระบบด้วย Discord
+import React, { useState, useEffect } from 'react';
+import { Upload, Eye, Trash2, Plus, Settings, AlertTriangle, Power, Check } from 'lucide-react';
+
+// ตั้งค่า Admin
+const ADMIN_CONFIG = {
+  adminUsers: ['AdminRTA', 'OwnerRTA'],
+  adminKey: 'RTA2024SECURE'
+};
+
+const App = () => {
+  const [currentPage, setCurrentPage] = useState('username');
+  const [username, setUsername] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState('');
+  const [formData, setFormData] = useState({});
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [showAdminKeyPopup, setShowAdminKeyPopup] = useState(false);
+  const [adminKeyInput, setAdminKeyInput] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminPage, setAdminPage] = useState('submissions');
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+  const [maintenanceTime, setMaintenanceTime] = useState('');
+  
+  const [teams, setTeams] = useState([
+    { id: 'police', name: 'ตำรวจ', color: '#3b82f6' },
+    { id: 'military', name: 'ทหาร', color: '#10b981' },
+    { id: 'rescue', name: 'กู้ภัย', color: '#ef4444' },
+    { id: 'medic', name: 'หมอ', color: '#f59e0b' }
+  ]);
+  
+  const [formFields, setFormFields] = useState([
+    { id: 'age', label: 'อายุ', type: 'text', required: true },
+    { id: 'experience', label: 'ประสบการณ์', type: 'text', required: true },
+    { id: 'reason', label: 'เหตุผลที่สมัคร', type: 'textarea', required: true }
+  ]);
+  
+  const [submissions, setSubmissions] = useState([]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      const thaiTime = now.toLocaleString('th-TH', { 
+        timeZone: 'Asia/Bangkok',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      setMaintenanceTime(thaiTime);
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (username && ADMIN_CONFIG.adminUsers.includes(username) && !isAdmin && currentPage === 'username') {
+      setShowAdminKeyPopup(true);
+    }
+  }, [username]);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!uploadedImage) {
+      alert('กรุณาอัปโหลดรูปภาพ');
+      return;
+    }
+    
+    const allFieldsFilled = formFields.every(field => 
+      field.required ? (formData[field.id] && formData[field.id].trim()) : true
+    );
+    
+    if (!allFieldsFilled) {
+      alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
+      return;
+    }
+
+    const newSubmission = {
+      id: Date.now(),
+      username,
+      team: teams.find(t => t.id === selectedTeam)?.name || 'ไม่ระบุ',
+      ...formData,
+      image: uploadedImage,
+      timestamp: new Date().toLocaleString('th-TH')
+    };
+    
+    setSubmissions(prev => [...prev, newSubmission]);
+    alert('ส่งข้อมูลเรียบร้อยแล้ว!');
+    
+    setCurrentPage('username');
+    setUsername('');
+    setSelectedTeam('');
+    setFormData({});
+    setUploadedImage(null);
+  };
+
+  const handleAdminLogin = () => {
+    if (adminKeyInput === ADMIN_CONFIG.adminKey) {
+      setIsAdmin(true);
+      setShowAdminKeyPopup(false);
+      setAdminKeyInput('');
+    } else {
+      alert('คีย์ไม่ถูกต้อง');
+      setAdminKeyInput('');
+    }
+  };
+
+  const addFormField = () => {
+    const label = prompt('ชื่อช่องกรอก:');
+    if (!label) return;
+    
+    const type = window.confirm('ต้องการให้เป็นช่องข้อความยาว?') ? 'textarea' : 'text';
+    const required = window.confirm('บังคับกรอก?');
+    
+    setFormFields(prev => [...prev, {
+      id: `field_${Date.now()}`,
+      label: label,
+      type: type,
+      required: required
+    }]);
+  };
+
+  const removeFormField = (id) => {
+    if (window.confirm('ต้องการลบช่องนี้?')) {
+      setFormFields(prev => prev.filter(field => field.id !== id));
+    }
+  };
+
+  const addTeam = () => {
+    const teamName = prompt('ชื่อสังกัด/ทีม:');
+    if (teamName && teamName.trim()) {
+      setTeams(prev => [...prev, {
+        id: `team_${Date.now()}`,
+        name: teamName,
+        color: '#' + Math.floor(Math.random()*16777215).toString(16)
+      }]);
+    }
+  };
+
+  const removeTeam = (id) => {
+    if (window.confirm('ต้องการลบสังกัดนี้?')) {
+      setTeams(prev => prev.filter(team => team.id !== id));
+    }
+  };
+
+  const deleteSubmission = (id) => {
+    if (window.confirm('ต้องการลบการสมัครนี้?')) {
+      setSubmissions(prev => prev.filter(sub => sub.id !== id));
+    }
+  };
+
+  const toggleMaintenance = () => {
+    if (isMaintenanceMode) {
+      if (window.confirm('ต้องการเปิดเว็บไซต์และรีเซ็ตข้อมูลการสมัครทั้งหมด?')) {
+        setIsMaintenanceMode(false);
+        setSubmissions([]);
+        alert('เปิดเว็บไซต์แล้ว! ข้อมูลการสมัครถูกรีเซ็ตเรียบร้อย');
+      }
+    } else {
+      if (window.confirm('ต้องการปิดเว็บไซต์เพื่ออัปเดต?')) {
+        setIsMaintenanceMode(true);
+        alert('ปิดเว็บไซต์แล้ว - ผู้ใช้ทั่วไปจะเห็นหน้าอัปเดต');
+      }
+    }
+  };
+
+  // Maintenance Page
+  if (isMaintenanceMode && !isAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-2xl p-12 w-full max-w-2xl text-center">
+          <AlertTriangle className="mx-auto mb-6 text-orange-500" size={80} />
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">เว็บไซต์กำลังอัปเดต</h1>
+          <p className="text-xl text-gray-600 mb-8">โปรดรอสักครู่ จะให้บริการเร็วๆ นี้</p>
+          
+          <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-2xl p-6 mb-6">
+            <p className="text-lg font-semibold text-gray-700 mb-2">เวลาปัจจุบัน (ประเทศไทย)</p>
+            <p className="text-2xl font-bold text-orange-600">{maintenanceTime}</p>
+          </div>
+          
+          <div className="border-t border-gray-200 pt-6">
+            <p className="text-gray-500">
+              ขออภัยในความไม่สะดวก<br />
+              ขอบคุณที่รอคอย
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin Panel
+  if (isAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-3xl shadow-2xl p-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+              <h1 className="text-3xl md:text-4xl font-bold text-purple-600">
+                🔒 ระบบจัดการแอดมิน
+              </h1>
+              <button
+                onClick={toggleMaintenance}
+                type="button"
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition ${
+                  isMaintenanceMode
+                    ? 'bg-green-600 text-white hover:bg-green-700'
+                    : 'bg-orange-600 text-white hover:bg-orange-700'
+                }`}
+              >
+                <Power size={20} />
+                {isMaintenanceMode ? 'เปิดเว็บ & รีเซ็ต' : 'ปิดเว็บ (อัปเดต)'}
+              </button>
+            </div>
+            
+            {isMaintenanceMode && (
+              <div className="bg-orange-100 border-2 border-orange-300 rounded-2xl p-4 mb-6">
+                <p className="text-orange-800 font-semibold text-center">
+                  ⚠️ เว็บไซต์ปิดให้บริการ - ผู้ใช้ทั่วไปเห็นหน้าอัปเดต
+                </p>
+              </div>
+            )}
+            
+            <div className="flex gap-2 md:gap-4 mb-8 overflow-x-auto pb-2">
+              <button
+                onClick={() => setAdminPage('submissions')}
+                type="button"
+                className={`px-4 md:px-6 py-3 rounded-xl font-semibold transition whitespace-nowrap ${
+                  adminPage === 'submissions'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                <Eye className="inline mr-2" size={20} />
+                ตรวจสอบการสมัคร
+              </button>
+              <button
+                onClick={() => setAdminPage('teams')}
+                type="button"
+                className={`px-4 md:px-6 py-3 rounded-xl font-semibold transition whitespace-nowrap ${
+                  adminPage === 'teams'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                <Settings className="inline mr-2" size={20} />
+                ตั้งค่าสังกัด
+              </button>
+              <button
+                onClick={() => setAdminPage('fields')}
+                type="button"
+                className={`px-4 md:px-6 py-3 rounded-xl font-semibold transition whitespace-nowrap ${
+                  adminPage === 'fields'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                <Plus className="inline mr-2" size={20} />
+                จัดการช่องกรอก
+              </button>
+            </div>
+
+            {adminPage === 'submissions' && (
+              <div>
+                <h2 className="text-2xl font-bold mb-4">การสมัครทั้งหมด ({submissions.length})</h2>
+                {submissions.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">ยังไม่มีการสมัคร</p>
+                ) : (
+                  <div className="space-y-4">
+                    {submissions.map(sub => (
+                      <div key={sub.id} className="border border-gray-200 rounded-2xl p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="text-xl font-bold">{sub.username}</h3>
+                            <p className="text-gray-600">สังกัด: {sub.team}</p>
+                            <p className="text-sm text-gray-500">{sub.timestamp}</p>
+                          </div>
+                          <button
+                            onClick={() => deleteSubmission(sub.id)}
+                            type="button"
+                            className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        </div>
+                        {sub.image && (
+                          <img src={sub.image} alt="Submission" className="w-full max-h-64 object-cover rounded-xl mb-4" />
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {Object.entries(sub).map(([key, value]) => {
+                            if (!['id', 'username', 'team', 'image', 'timestamp'].includes(key)) {
+                              return (
+                                <div key={key} className="bg-gray-50 p-3 rounded-lg">
+                                  <span className="font-semibold text-gray-700">{key}: </span>
+                                  <span className="text-gray-600">{value}</span>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {adminPage === 'teams' && (
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold">จัดการสังกัด/ทีม</h2>
+                  <button
+                    onClick={addTeam}
+                    type="button"
+                    className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 flex items-center gap-2 transition"
+                  >
+                    <Plus size={20} />
+                    เพิ่มสังกัด
+                  </button>
+                </div>
+                {teams.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">ยังไม่มีสังกัด</p>
+                ) : (
+                  <div className="space-y-3">
+                    {teams.map(team => (
+                      <div key={team.id} className="flex justify-between items-center border border-gray-200 rounded-xl p-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-6 h-6 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: team.color }}
+                          />
+                          <span className="font-semibold">{team.name}</span>
+                        </div>
+                        <button
+                          onClick={() => removeTeam(team.id)}
+                          type="button"
+                          className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {adminPage === 'fields' && (
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold">จัดการช่องกรอกข้อมูล</h2>
+                  <button
+                    onClick={addFormField}
+                    type="button"
+                    className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 flex items-center gap-2 transition"
+                  >
+                    <Plus size={20} />
+                    เพิ่มช่องกรอก
+                  </button>
+                </div>
+                {formFields.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">ยังไม่มีช่องกรอกข้อมูล</p>
+                ) : (
+                  <div className="space-y-3">
+                    {formFields.map(field => (
+                      <div key={field.id} className="flex justify-between items-center border border-gray-200 rounded-xl p-4">
+                        <div>
+                          <span className="font-semibold">{field.label}</span>
+                          <span className="text-gray-500 ml-2">({field.type})</span>
+                          {field.required && <span className="text-red-500 ml-2">* บังคับ</span>}
+                        </div>
+                        <button
+                          onClick={() => removeFormField(field.id)}
+                          type="button"
+                          className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Username Page
+  if (currentPage === 'username') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
+          <h1 className="text-4xl font-bold text-center text-indigo-600 mb-2">RTAROBLOXTH</h1>
+          <p className="text-center text-gray-600 mb-8">ระบบลงทะเบียนสมาชิก</p>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                ชื่อในเกม Roblox
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                placeholder="กรอกชื่อของคุณ"
+              />
+            </div>
+            
+            <button
+              onClick={() => {
+                if (username.trim()) {
+                  setCurrentPage('selectTeam');
+                } else {
+                  alert('กรุณากรอกชื่อผู้ใช้');
+                }
+              }}
+              type="button"
+              className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition"
+            >
+              ถัดไป
             </button>
+          </div>
         </div>
-    </div>
-
-    <!-- หน้ารอการอนุมัติ -->
-    <div id="pendingPage" class="pending-container" style="display: none;">
-        <div class="pending-box">
-            <div class="pending-icon">⏳</div>
-            <h2>รอการอนุมัติ</h2>
-            <p>คุณได้ส่งคำขอเข้าใช้งานแล้ว<br>กรุณารอให้ผู้ดูแลระบบอนุมัติการเข้าใช้งานของคุณ</p>
-            <div class="user-info">
-                <img id="pendingAvatar" class="user-avatar" src="" alt="Avatar">
-                <div style="font-weight: 700; font-size: 1.2em; margin-bottom: 5px;" id="pendingUsername"></div>
-                <div style="color: #666;" id="pendingEmail"></div>
+        
+        {showAdminKeyPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
+              <h3 className="text-2xl font-bold text-center text-indigo-600 mb-6">ยืนยันตัวตนแอดมิน</h3>
+              <input
+                type="password"
+                value={adminKeyInput}
+                onChange={(e) => setAdminKeyInput(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 mb-4 outline-none"
+                placeholder="กรอกคีย์แอดมิน"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleAdminLogin();
+                  }
+                }}
+              />
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowAdminKeyPopup(false);
+                    setUsername('');
+                    setAdminKeyInput('');
+                  }}
+                  type="button"
+                  className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  onClick={handleAdminLogin}
+                  type="button"
+                  className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition"
+                >
+                  ยืนยัน
+                </button>
+              </div>
             </div>
-            <button class="logout-btn" onclick="logout()">ออกจากระบบ</button>
-        </div>
-    </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
-    <!-- หน้าหลัก -->
-    <div id="mainPage" style="display: none;">
-        <!-- เมนูผู้ใช้ -->
-        <div class="user-menu">
-            <img id="userAvatar" class="user-avatar-btn" src="" alt="User" onclick="toggleUserMenu()">
-            <div id="userDropdown" class="dropdown-menu">
-                <div class="dropdown-header" id="dropdownUsername"></div>
-                <div class="dropdown-item" onclick="showCommands()">
-                    ⚙️ คำสั่งต่างๆ
-                </div>
-                <div class="dropdown-item" id="approvalMenuItem" onclick="showPendingUsers()" style="display: none;">
-                    👥 ดูบัญชีผู้ขอเข้าใช้งาน
-                </div>
-                <div class="dropdown-item" onclick="logout()">
-                    🚪 ออกจากระบบ
-                </div>
-            </div>
-        </div>
-
-        <div class="container">
-            <div class="header">
-                <h1>🎮 ระบบจัดการผู้เล่น Roblox</h1>
-                <div class="stats">
-                    <div class="stat-item">
-                        👥 ทั้งหมด: <span class="stat-number" id="totalPlayers">0</span>
-                    </div>
-                    <div class="stat-item">
-                        🟢 ออนไลน์: <span class="stat-number" id="onlinePlayers">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="players-section">
-                <div class="section-title">👥 รายชื่อผู้เล่น</div>
-                <div class="players-list" id="playersList">
-                    <div class="empty-state">
-                        <h3>ไม่มีผู้เล่นในเซิร์ฟเวอร์</h3>
-                        <p>รอผู้เล่นเข้าเกม...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal ดูบัญชีผู้ขอเข้าใช้งาน -->
-    <div id="pendingUsersModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">👥 บัญชีผู้ขอเข้าใช้งาน</div>
-            <div class="modal-body">
-                <div id="pendingUsersList"></div>
-                <button class="btn-close" onclick="closePendingModal()">ปิด</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- UI แจ้งเตือน -->
-    <div id="notificationOverlay" class="notification-overlay" onclick="closeNotification()"></div>
-    <div id="notification" class="notification">
-        <div class="notification-icon" id="notifIcon"></div>
-        <div class="notification-title" id="notifTitle"></div>
-        <div class="notification-message" id="notifMessage"></div>
-        <button class="notification-close" onclick="closeNotification()">ปิด</button>
-    </div>
-
-    <script>
-        // ตั้งค่าเจ้าของระบบ (แก้ไขตรงนี้)
-        const OWNER_CONFIG = {
-            email: "your-email@example.com",  // ใส่อีเมล Discord ของคุณ
-            password: "your-password-here"     // ใส่รหัสผ่านที่ต้องการ
-        };
-
-        // จำลองข้อมูล
-        let currentUser = null;
-        let pendingUsers = [];
-        let approvedUsers = [];
-
-        // ฟังก์ชันแสดงการแจ้งเตือน
-        function showNotification(type, title, message) {
-            const notif = document.getElementById('notification');
-            const overlay = document.getElementById('notificationOverlay');
-            const icon = document.getElementById('notifIcon');
-            const titleEl = document.getElementById('notifTitle');
-            const messageEl = document.getElementById('notifMessage');
-
-            // ลบ class เก่า
-            notif.className = 'notification';
-            
-            // เพิ่ม class ใหม่
-            notif.classList.add(type);
-            
-            // ตั้งค่าไอคอนตามประเภท
-            const icons = {
-                success: '✅',
-                error: '❌',
-                warning: '⚠️',
-                info: 'ℹ️'
-            };
-            
-            icon.textContent = icons[type] || 'ℹ️';
-            titleEl.textContent = title;
-            messageEl.textContent = message;
-            
-            // แสดงการแจ้งเตือน
-            overlay.classList.add('show');
-            notif.classList.add('show');
-        }
-
-        // ปิดการแจ้งเตือน
-        function closeNotification() {
-            document.g
+  // Select Team Page
+  if (currentPage === 'selectTeam') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-2xl">
+          <h2 className="text-3xl font-bold text-center text-indigo-600 mb-2">เลือกสังกัด/ทีม</h2>
+          <p className="text-center text-gray-600 mb-8">สวัสดี {username}!</p>
+          
+          {teams.length === 0 ? (
+            <p className="text-center text-gray-500 py-8">ยังไม่มีสังกัด กรุณารอแอดมินเพิ่ม</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {teams.map(team => (
+                <button
+                  key={team.id}
+                  onClick={() => setSelectedTeam(team.id)}
+                  type="button"
+                  className={`p-6 rounded-2xl border-2 transition ${
+                    selectedTeam === team.id
+                      ? 'border-indigo-600 bg-indigo-50'
+                      : 'border-gray-200 hover:border-indigo-300'
+                  }`}
+                  style={{ borderColor: selectedTeam === team.id ? team.color : undefined }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-lg">{team.name}</span>
+                    {selectedTeam === team.id && <Check className="text-indigo-60
