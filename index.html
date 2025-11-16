@@ -18,247 +18,198 @@
             padding: 15px;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
+        /* หน้า Login */
+        .login-container {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            justify-content: center;
+            min-height: 100vh;
         }
 
-        .header h1 {
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .login-box h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .login-box p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .discord-btn {
+            background: #5865F2;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .discord-btn:hover {
+            background: #4752C4;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(88, 101, 242, 0.4);
+        }
+
+        /* หน้ารอการอนุมัติ */
+        .pending-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .pending-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .pending-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .pending-box h2 {
             color: #667eea;
             font-size: 1.8em;
+            margin-bottom: 15px;
         }
 
-        .header-stats {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .stat-item {
-            background: #f0f0f0;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
-        .stat-number {
-            color: #667eea;
-            font-size: 1.2em;
-        }
-
-        .reset-info {
+        .pending-box p {
             color: #666;
-            font-size: 0.9em;
-            text-align: right;
+            margin-bottom: 20px;
+            line-height: 1.6;
         }
 
-        .reset-timer {
-            font-weight: 700;
-            color: #ef4444;
-            font-size: 1.1em;
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
         }
 
-        .controls {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
         }
 
-        .btn-refresh {
-            background: #667eea;
+        .logout-btn {
+            background: #ef4444;
             color: white;
             border: none;
             padding: 10px 20px;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            margin-top: 20px;
         }
 
-        .btn-refresh:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
+        .logout-btn:hover {
+            background: #dc2626;
         }
 
-        .players-section {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        /* เมนูผู้ใช้มุมขวาบน */
+        .user-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
         }
 
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #667eea;
-        }
-
-        .section-title {
-            color: #667eea;
-            font-size: 1.5em;
-            font-weight: 700;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .filter-btn {
-            padding: 6px 12px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .filter-btn.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .players-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-        }
-
-        .player-item {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-            position: relative;
-        }
-
-        .player-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            border-color: #667eea;
-        }
-
-        .player-item.offline {
-            opacity: 0.6;
-        }
-
-        .player-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .avatar-container {
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .player-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 10px;
-            border: 3px solid #667eea;
-        }
-
-        .status-dot {
-            position: absolute;
-            bottom: -2px;
-            right: -2px;
-            width: 18px;
-            height: 18px;
+        .user-avatar-btn {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             border: 3px solid white;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            object-fit: cover;
         }
 
-        .status-dot.online {
-            background: #10b981;
-            animation: pulse 2s infinite;
+        .user-avatar-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
         }
 
-        .status-dot.offline {
-            background: #ef4444;
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            min-width: 250px;
+            overflow: hidden;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.3s;
         }
 
-        .player-info {
-            flex: 1;
-            min-width: 0;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .player-name {
-            font-weight: 700;
-            font-size: 1.1em;
-            color: #667eea;
-            text-decoration: none;
-            display: inline-block;
-            margin-bottom: 4px;
-            word-break: break-word;
+        .dropdown-header {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            font-weight: 600;
         }
 
-        .player-name:hover {
-            text-decoration: underline;
-        }
-
-        .player-team {
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 4px;
+        .dropdown-item {
+            padding: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+            border-bottom: 1px solid #f0f0f0;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 10px;
         }
 
-        .player-time {
-            color: #999;
-            font-size: 0.85em;
+        .dropdown-item:hover {
+            background: #f8f9fa;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
+        .dropdown-item:last-child {
+            border-bottom: none;
         }
 
-        .empty-state svg {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 15px;
-            opacity: 0.5;
-        }
-
+        /* Modal อนุมัติผู้ใช้ */
         .modal {
             display: none;
             position: fixed;
@@ -280,7 +231,7 @@
         .modal-content {
             background: white;
             border-radius: 15px;
-            max-width: 500px;
+            max-width: 600px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -300,409 +251,428 @@
             padding: 25px;
         }
 
-        .menu-item {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 12px;
-            cursor: pointer;
+        .pending-user-item {
             background: #f8f9fa;
-            transition: all 0.3s;
-            border: 2px solid transparent;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
-        .menu-item:hover {
-            background: #e9ecef;
-            border-color: #667eea;
-            transform: translateX(5px);
+        .pending-user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
         }
 
-        .menu-item-title {
+        .pending-user-info {
+            flex: 1;
+        }
+
+        .pending-user-name {
             font-weight: 700;
             font-size: 1.1em;
             color: #333;
             margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .menu-item-desc {
-            font-size: 0.9em;
+        .pending-user-email {
             color: #666;
+            font-size: 0.9em;
         }
 
-        .action-form {
-            display: none;
-        }
-
-        .action-form.show {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-            font-family: inherit;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-            cursor: pointer;
-        }
-
-        .form-select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .current-team-info {
-            background: #f0f9ff;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            color: #0369a1;
-            font-weight: 600;
-        }
-
-        .btn-group {
+        .pending-user-actions {
             display: flex;
             gap: 10px;
-            margin-top: 20px;
         }
 
-        .btn {
-            flex: 1;
-            padding: 12px;
+        .btn-approve {
+            background: #10b981;
+            color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1em;
+            padding: 8px 15px;
+            border-radius: 6px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
         }
 
-        .btn-cancel {
-            background: #6b7280;
-            color: white;
+        .btn-approve:hover {
+            background: #059669;
         }
 
-        .btn-cancel:hover {
-            background: #4b5563;
-        }
-
-        .btn-danger {
+        .btn-reject {
             background: #ef4444;
             color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
-        .btn-danger:hover {
+        .btn-reject:hover {
             background: #dc2626;
         }
 
-        .btn-primary {
-            background: #3b82f6;
+        .empty-pending {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .btn-close {
+            background: #6b7280;
             color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-
-        .success-message {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 15px;
+            border: none;
+            padding: 10px 20px;
             border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-close:hover {
+            background: #4b5563;
+        }
+
+        /* หน้าหลัก */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 80px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 1.8em;
             margin-bottom: 15px;
-            border: 2px solid #34d399;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: #f0f0f0;
+            padding: 10px 20px;
+            border-radius: 8px;
             font-weight: 600;
         }
 
-        .back-btn {
+        .stat-number {
+            color: #667eea;
+            font-size: 1.3em;
+        }
+
+        .players-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .players-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .player-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .player-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        /* UI แจ้งเตือน */
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            z-index: 2000;
+            min-width: 300px;
+            max-width: 90%;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { 
+                transform: translate(-50%, -60%);
+                opacity: 0;
+            }
+            to { 
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+        }
+
+        .notification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1999;
+            display: none;
+        }
+
+        .notification-overlay.show {
+            display: block;
+        }
+
+        .notification-icon {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .notification-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .notification-message {
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .notification-close {
             background: #667eea;
             color: white;
-            padding: 8px 15px;
             border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-bottom: 15px;
+            padding: 12px 30px;
+            border-radius: 8px;
             font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
         }
 
-        .back-btn:hover {
+        .notification-close:hover {
             background: #5568d3;
         }
 
+        .notification.success .notification-icon {
+            color: #10b981;
+        }
+
+        .notification.error .notification-icon {
+            color: #ef4444;
+        }
+
+        .notification.warning .notification-icon {
+            color: #f59e0b;
+        }
+
+        .notification.info .notification-icon {
+            color: #3b82f6;
+        }
+
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.5em;
-            }
-            
-            .players-list {
-                grid-template-columns: 1fr;
+            .pending-user-item {
+                flex-direction: column;
+                text-align: center;
             }
 
-            .header-stats {
+            .pending-user-actions {
                 width: 100%;
-                justify-content: space-between;
+                justify-content: center;
+            }
+
+            .notification {
+                padding: 25px;
+                min-width: 280px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="header-top">
-                <h1>🎮 ระบบจัดการผู้เล่น Roblox</h1>
-                <div class="reset-info">
-                    รีเซ็ตรายชื่อใน:<br>
-                    <span class="reset-timer" id="resetTimer">--:--:--</span>
-                </div>
+    <!-- หน้า Login -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <h1>🎮 Roblox Player Management</h1>
+            <p>กรุณาเข้าสู่ระบบด้วย Discord เพื่อเริ่มใช้งาน</p>
+            <button class="discord-btn" onclick="loginWithDiscord()">
+                <svg width="24" height="24" viewBox="0 0 71 55" fill="none">
+                    <path d="M60.1045 4.8978C55.5792 2.8214 50.7265 1.2916 45.6527 0.41542C45.5603 0.39851 45.468 0.440769 45.4204 0.525289C44.7963 1.6353 44.105 3.0834 43.6209 4.2216C38.1637 3.4046 32.7345 3.4046 27.3892 4.2216C26.905 3.0581 26.1886 1.6353 25.5617 0.525289C25.5141 0.443589 25.4218 0.40133 25.3294 0.41542C20.2584 1.2888 15.4057 2.8186 10.8776 4.8978C10.8384 4.9147 10.8048 4.9429 10.7825 4.9795C1.57795 18.7309 -0.943561 32.1443 0.293408 45.3914C0.299005 45.4562 0.335386 45.5182 0.385761 45.5576C6.45866 50.0174 12.3413 52.7249 18.1147 54.5195C18.2071 54.5477 18.305 54.5139 18.3638 54.4378C19.7295 52.5728 20.9469 50.6063 21.9907 48.5383C22.0523 48.4172 21.9935 48.2735 21.8676 48.2256C19.9366 47.4931 18.0979 46.6 16.3292 45.5858C16.1893 45.5041 16.1781 45.304 16.3068 45.2082C16.679 44.9293 17.0513 44.6391 17.4067 44.3461C17.471 44.2926 17.5606 44.2813 17.6362 44.3151C29.2558 49.6202 41.8354 49.6202 53.3179 44.3151C53.3935 44.2785 53.4831 44.2898 53.5502 44.3433C53.9057 44.6363 54.2779 44.9293 54.6529 45.2082C54.7816 45.304 54.7732 45.5041 54.6333 45.5858C52.8646 46.6197 51.0259 47.4931 49.0921 48.2228C48.9662 48.2707 48.9102 48.4172 48.9718 48.5383C50.038 50.6034 51.2554 52.5699 52.5959 54.435C52.6519 54.5139 52.7526 54.5477 52.845 54.5195C58.6464 52.7249 64.529 50.0174 70.6019 45.5576C70.6551 45.5182 70.6887 45.459 70.6943 45.3942C72.1747 30.0791 68.2147 16.7757 60.1968 4.9823C60.1772 4.9429 60.1437 4.9147 60.1045 4.8978ZM23.7259 37.3253C20.2276 37.3253 17.3451 34.1136 17.3451 30.1693C17.3451 26.225 20.1717 23.0133 23.7259 23.0133C27.308 23.0133 30.1626 26.2532 30.1066 30.1693C30.1066 34.1136 27.28 37.3253 23.7259 37.3253ZM47.3178 37.3253C43.8196 37.3253 40.9371 34.1136 40.9371 30.1693C40.9371 26.225 43.7636 23.0133 47.3178 23.0133C50.9 23.0133 53.7545 26.2532 53.6986 30.1693C53.6986 34.1136 50.9 37.3253 47.3178 37.3253Z" fill="white"/>
+                </svg>
+                เข้าสู่ระบบด้วย Discord
+            </button>
+        </div>
+    </div>
+
+    <!-- หน้ารอการอนุมัติ -->
+    <div id="pendingPage" class="pending-container" style="display: none;">
+        <div class="pending-box">
+            <div class="pending-icon">⏳</div>
+            <h2>รอการอนุมัติ</h2>
+            <p>คุณได้ส่งคำขอเข้าใช้งานแล้ว<br>กรุณารอให้ผู้ดูแลระบบอนุมัติการเข้าใช้งานของคุณ</p>
+            <div class="user-info">
+                <img id="pendingAvatar" class="user-avatar" src="" alt="Avatar">
+                <div style="font-weight: 700; font-size: 1.2em; margin-bottom: 5px;" id="pendingUsername"></div>
+                <div style="color: #666;" id="pendingEmail"></div>
             </div>
-            <div class="header-stats">
-                <div class="stat-item">
-                    👥 ทั้งหมด: <span class="stat-number" id="totalPlayers">0</span>
+            <button class="logout-btn" onclick="logout()">ออกจากระบบ</button>
+        </div>
+    </div>
+
+    <!-- หน้าหลัก -->
+    <div id="mainPage" style="display: none;">
+        <!-- เมนูผู้ใช้ -->
+        <div class="user-menu">
+            <img id="userAvatar" class="user-avatar-btn" src="" alt="User" onclick="toggleUserMenu()">
+            <div id="userDropdown" class="dropdown-menu">
+                <div class="dropdown-header" id="dropdownUsername"></div>
+                <div class="dropdown-item" onclick="showCommands()">
+                    ⚙️ คำสั่งต่างๆ
                 </div>
-                <div class="stat-item">
-                    🟢 ออนไลน์: <span class="stat-number" id="onlinePlayers">0</span>
+                <div class="dropdown-item" id="approvalMenuItem" onclick="showPendingUsers()" style="display: none;">
+                    👥 ดูบัญชีผู้ขอเข้าใช้งาน
                 </div>
-                <div class="stat-item">
-                    🔴 ออฟไลน์: <span class="stat-number" id="offlinePlayers">0</span>
+                <div class="dropdown-item" onclick="logout()">
+                    🚪 ออกจากระบบ
                 </div>
-            </div>
-            <div class="controls">
-                <button class="btn-refresh" onclick="refreshPlayers()">
-                    <span>🔄</span> รีเฟรช
-                </button>
             </div>
         </div>
 
-        <div class="players-section">
-            <div class="section-header">
-                <div class="section-title">👥 รายชื่อผู้เล่น</div>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" onclick="filterPlayers('all')">ทั้งหมด</button>
-                    <button class="filter-btn" onclick="filterPlayers('online')">🟢 ออนไลน์</button>
-                    <button class="filter-btn" onclick="filterPlayers('offline')">🔴 ออฟไลน์</button>
+        <div class="container">
+            <div class="header">
+                <h1>🎮 ระบบจัดการผู้เล่น Roblox</h1>
+                <div class="stats">
+                    <div class="stat-item">
+                        👥 ทั้งหมด: <span class="stat-number" id="totalPlayers">0</span>
+                    </div>
+                    <div class="stat-item">
+                        🟢 ออนไลน์: <span class="stat-number" id="onlinePlayers">0</span>
+                    </div>
                 </div>
             </div>
-            <div class="players-list" id="playersList">
-                <div class="empty-state">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    <h3>ไม่มีผู้เล่นในเซิร์ฟเวอร์</h3>
-                    <p>รอผู้เล่นเข้าเกม...</p>
+
+            <div class="players-section">
+                <div class="section-title">👥 รายชื่อผู้เล่น</div>
+                <div class="players-list" id="playersList">
+                    <div class="empty-state">
+                        <h3>ไม่มีผู้เล่นในเซิร์ฟเวอร์</h3>
+                        <p>รอผู้เล่นเข้าเกม...</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal จัดการผู้เล่น -->
-    <div id="menuModal" class="modal">
+    <!-- Modal ดูบัญชีผู้ขอเข้าใช้งาน -->
+    <div id="pendingUsersModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header" id="modalPlayerName">จัดการผู้เล่น</div>
-            <div class="modal-body" id="modalBody">
-                <div id="menuOptions">
-                    <div class="menu-item" onclick="showKickForm()">
-                        <div class="menu-item-title">👢 เตะผู้เล่น</div>
-                        <div class="menu-item-desc">เตะผู้เล่นออกจากเกม</div>
-                    </div>
-                    <div class="menu-item" onclick="showTeamForm()">
-                        <div class="menu-item-title">🔄 เปลี่ยนทีม</div>
-                        <div class="menu-item-desc">เปลี่ยนทีมของผู้เล่น</div>
-                    </div>
-                    <button class="btn btn-cancel" style="width: 100%; margin-top: 10px;" onclick="closeModal()">ปิด</button>
-                </div>
-
-                <!-- Form เตะผู้เล่น -->
-                <div id="kickForm" class="action-form">
-                    <button class="back-btn" onclick="showMenu()">← กลับ</button>
-                    <div id="kickSuccess" class="success-message" style="display: none;">
-                        ✅ เตะผู้เล่นสำเร็จ!
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">⚠️ เตะผู้เล่น: <span id="kickPlayerName"></span></label>
-                        <label class="form-label">กรุณาใส่เหตุผล:</label>
-                        <textarea id="kickReason" class="form-input form-textarea" placeholder="เหตุผลที่เตะผู้เล่น..."></textarea>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-cancel" onclick="showMenu()">ยกเลิก</button>
-                        <button class="btn btn-danger" onclick="confirmKick()">เตะผู้เล่น</button>
-                    </div>
-                </div>
-
-                <!-- Form เปลี่ยนทีม -->
-                <div id="teamForm" class="action-form">
-                    <button class="back-btn" onclick="showMenu()">← กลับ</button>
-                    <div id="teamSuccess" class="success-message" style="display: none;">
-                        ✅ เปลี่ยนทีมสำเร็จ!
-                    </div>
-                    <div class="current-team-info" id="currentTeamInfo">
-                        ทีมปัจจุบัน: --
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">เลือกทีมใหม่:</label>
-                        <select id="teamSelect" class="form-select">
-                            <option value="">-- กรุณาเลือกทีม --</option>
-                        </select>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-cancel" onclick="showMenu()">ยกเลิก</button>
-                        <button class="btn btn-primary" onclick="confirmTeamChange()">เปลี่ยนทีม</button>
-                    </div>
-                </div>
+            <div class="modal-header">👥 บัญชีผู้ขอเข้าใช้งาน</div>
+            <div class="modal-body">
+                <div id="pendingUsersList"></div>
+                <button class="btn-close" onclick="closePendingModal()">ปิด</button>
             </div>
         </div>
+    </div>
+
+    <!-- UI แจ้งเตือน -->
+    <div id="notificationOverlay" class="notification-overlay" onclick="closeNotification()"></div>
+    <div id="notification" class="notification">
+        <div class="notification-icon" id="notifIcon"></div>
+        <div class="notification-title" id="notifTitle"></div>
+        <div class="notification-message" id="notifMessage"></div>
+        <button class="notification-close" onclick="closeNotification()">ปิด</button>
     </div>
 
     <script>
-        let players = {};
-        let teams = [];
-        let currentPlayerId = null;
-        let currentFilter = 'all';
+        // ตั้งค่าเจ้าของระบบ (แก้ไขตรงนี้)
+        const OWNER_CONFIG = {
+            email: "your-email@example.com",  // ใส่อีเมล Discord ของคุณ
+            password: "your-password-here"     // ใส่รหัสผ่านที่ต้องการ
+        };
 
-        // ตั้งค่าการเชื่อมต่อ
-        const API_URL = 'YOUR_SERVER_URL_HERE'; // แก้ไข URL ตรงนี้
+        // จำลองข้อมูล
+        let currentUser = null;
+        let pendingUsers = [];
+        let approvedUsers = [];
 
-        // เชื่อมต่อ WebSocket (ถ้ามี)
-        let ws = null;
-        function connectWebSocket() {
-            try {
-                ws = new WebSocket(API_URL.replace('http', 'ws'));
-                
-                ws.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    handleServerMessage(data);
-                };
+        // ฟังก์ชันแสดงการแจ้งเตือน
+        function showNotification(type, title, message) {
+            const notif = document.getElementById('notification');
+            const overlay = document.getElementById('notificationOverlay');
+            const icon = document.getElementById('notifIcon');
+            const titleEl = document.getElementById('notifTitle');
+            const messageEl = document.getElementById('notifMessage');
 
-                ws.onerror = () => {
-                    console.log('ใช้โหมด Polling');
-                    startPolling();
-                };
-            } catch (error) {
-                startPolling();
-            }
-        }
-
-        // Polling
-        function startPolling() {
-            setInterval(fetchPlayers, 3000);
-        }
-
-        async function fetchPlayers() {
-            try {
-                const response = await fetch(API_URL + '/api/players');
-                const data = await response.json();
-                if (data.players) {
-                    players = {};
-                    data.players.forEach(p => {
-                        players[p.userId] = p;
-                    });
-                    renderPlayers();
-                }
-            } catch (error) {
-                console.log('Polling error:', error);
-            }
-        }
-
-        function handleServerMessage(data) {
-            if (data.type === 'PLAYER_JOINED') {
-                addPlayer(data.player);
-            } else if (data.type === 'PLAYER_LEFT') {
-                updatePlayerStatus(data.userId, false);
-            } else if (data.type === 'TEAMS_UPDATE') {
-                updateTeams(data.teams);
-            } else if (data.type === 'PLAYER_UPDATE') {
-                updatePlayer(data.player);
-            } else if (data.type === 'RESET_PLAYERS') {
-                resetPlayers();
-            }
-        }
-
-        function addPlayer(player) {
-            players[player.userId] = {
-                ...player,
-                online: true
-            };
-            renderPlayers();
-        }
-
-        function updatePlayerStatus(userId, online) {
-            if (players[userId]) {
-                players[userId].online = online;
-                renderPlayers();
-            }
-        }
-
-        function updatePlayer(player) {
-            if (players[player.userId]) {
-                players[player.userId] = {
-                    ...players[player.userId],
-                    ...player
-                };
-                renderPlayers();
-            }
-        }
-
-        function updateTeams(newTeams) {
-            teams = newTeams;
-            const select = document.getElementById('teamSelect');
-            select.innerHTML = '<option value="">-- กรุณาเลือกทีม --</option>' +
-                teams.map(team => `<option value="${team}">${team}</option>`).join('');
-        }
-
-        function resetPlayers() {
-            players = {};
-            renderPlayers();
-        }
-
-        function updateStats() {
-            const playerList = Object.values(players);
-            const online = playerList.filter(p => p.online).length;
-            const offline = playerList.length - online;
-
-            document.getElementById('totalPlayers').textContent = playerList.length;
-            document.getElementById('onlinePlayers').textContent = online;
-            document.getElementById('offlinePlayers').textContent = offline;
-        }
-
-        function filterPlayers(filter) {
-            currentFilter = filter;
+            // ลบ class เก่า
+            notif.className = 'notification';
             
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-  
+            // เพิ่ม class ใหม่
+            notif.classList.add(type);
+            
+            // ตั้งค่าไอคอนตามประเภท
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            icon.textContent = icons[type] || 'ℹ️';
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            
+            // แสดงการแจ้งเตือน
+            overlay.classList.add('show');
+            notif.classList.add('show');
+        }
+
+        // ปิดการแจ้งเตือน
+        function closeNotification() {
+            document.g
