@@ -1,511 +1,107 @@
-import React, { useState, useEffect } from 'react';
-import { Upload, Eye, Trash2, Plus, Settings, AlertTriangle, Power, Check } from 'lucide-react';
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
-// ตั้งค่า Admin
-const ADMIN_CONFIG = {
-  adminUsers: ['AdminRTA', 'OwnerRTA'],
-  adminKey: 'RTA2024SECURE'
-};
+local SetAFKStatus = ReplicatedStorage:WaitForChild("SetAFKStatus")
+local LocalPlayer = Players.LocalPlayer
 
-const App = () => {
-  const [currentPage, setCurrentPage] = useState('username');
-  const [username, setUsername] = useState('');
-  const [selectedTeam, setSelectedTeam] = useState('');
-  const [formData, setFormData] = useState({});
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [showAdminKeyPopup, setShowAdminKeyPopup] = useState(false);
-  const [adminKeyInput, setAdminKeyInput] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [adminPage, setAdminPage] = useState('submissions');
-  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
-  const [maintenanceTime, setMaintenanceTime] = useState('');
-  
-  const [teams, setTeams] = useState([
-    { id: 'police', name: 'ตำรวจ', color: '#3b82f6' },
-    { id: 'military', name: 'ทหาร', color: '#10b981' },
-    { id: 'rescue', name: 'กู้ภัย', color: '#ef4444' },
-    { id: 'medic', name: 'หมอ', color: '#f59e0b' }
-  ]);
-  
-  const [formFields, setFormFields] = useState([
-    { id: 'age', label: 'อายุ', type: 'text', required: true },
-    { id: 'experience', label: 'ประสบการณ์', type: 'text', required: true },
-    { id: 'reason', label: 'เหตุผลที่สมัคร', type: 'textarea', required: true }
-  ]);
-  
-  const [submissions, setSubmissions] = useState([]);
+local AUTO_AFK_DELAY = 300         -- ??????
+local MOVE_THRESHOLD = 1
+local TOGGLE_KEY = Enum.KeyCode.G  -- ???????? AFK
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      const thaiTime = now.toLocaleString('th-TH', { 
-        timeZone: 'Asia/Bangkok',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
-      setMaintenanceTime(thaiTime);
-    }, 1000);
-    
-    return () => clearInterval(timer);
-  }, []);
+local isAFK, manualAFK = false, false
+local lastActiveTime, lastPosition = os.clock(), nil
+local lastSent = nil
+local lastAFKToggle = 0
 
-  useEffect(() => {
-    if (username && ADMIN_CONFIG.adminUsers.includes(username) && !isAdmin && currentPage === 'username') {
-      setShowAdminKeyPopup(true);
-    }
-  }, [username]);
+-- ??????????????? AFK
+local function setAFK(newState)
+	if isAFK ~= newState then
+		isAFK = newState
+		if lastSent ~= isAFK then
+			SetAFKStatus:FireServer(isAFK)
+			lastSent = isAFK
+		end
+	end
+end
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+-- ?????????? activity
+local function resetTimer()
+	lastActiveTime = os.clock()
+	if isAFK and not manualAFK then
+		setAFK(false)
+	end
+end
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (!uploadedImage) {
-      alert('กรุณาอัปโหลดรูปภาพ');
-      return;
-    }
-    
-    const allFieldsFilled = formFields.every(field => 
-      field.required ? (formData[field.id] && formData[field.id].trim()) : true
-    );
-    
-    if (!allFieldsFilled) {
-      alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
-      return;
-    }
+-- ???? manual AFK
+local function toggleManual()
+	manualAFK = not manualAFK
+	setAFK(manualAFK)
+	if not manualAFK then
+		resetTimer()
+	end
+end
 
-    const newSubmission = {
-      id: Date.now(),
-      username,
-      team: teams.find(t => t.id === selectedTeam)?.name || 'ไม่ระบุ',
-      ...formData,
-      image: uploadedImage,
-      timestamp: new Date().toLocaleString('th-TH')
-    };
-    
-    setSubmissions(prev => [...prev, newSubmission]);
-    alert('ส่งข้อมูลเรียบร้อยแล้ว!');
-    
-    setCurrentPage('username');
-    setUsername('');
-    setSelectedTeam('');
-    setFormData({});
-    setUploadedImage(null);
-  };
+-- ??? input
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed then return end
+	if input.KeyCode == TOGGLE_KEY then
+		toggleManual()
+	elseif not manualAFK then
+		resetTimer()
+	end
+end)
 
-  const handleAdminLogin = () => {
-    if (adminKeyInput === ADMIN_CONFIG.adminKey) {
-      setIsAdmin(true);
-      setShowAdminKeyPopup(false);
-      setAdminKeyInput('');
-    } else {
-      alert('คีย์ไม่ถูกต้อง');
-      setAdminKeyInput('');
-    }
-  };
+UserInputService.InputChanged:Connect(function()
+	if not manualAFK then
+		resetTimer()
+	end
+end)
 
-  const addFormField = () => {
-    const label = prompt('ชื่อช่องกรอก:');
-    if (!label) return;
-    
-    const type = window.confirm('ต้องการให้เป็นช่องข้อความยาว?') ? 'textarea' : 'text';
-    const required = window.confirm('บังคับกรอก?');
-    
-    setFormFields(prev => [...prev, {
-      id: `field_${Date.now()}`,
-      label: label,
-      type: type,
-      required: required
-    }]);
-  };
+-- ?????? /afk
+TextChatService.OnIncomingMessage = function(message)
+	-- ?????????????????? manualAFK ????????
+	if manualAFK then return end
 
-  const removeFormField = (id) => {
-    if (window.confirm('ต้องการลบช่องนี้?')) {
-      setFormFields(prev => prev.filter(field => field.id !== id));
-    }
-  };
+	if message.TextSource and message.TextSource.UserId == LocalPlayer.UserId then
+		local text = message.Text:lower()
 
-  const addTeam = () => {
-    const teamName = prompt('ชื่อสังกัด/ทีม:');
-    if (teamName && teamName.trim()) {
-      setTeams(prev => [...prev, {
-        id: `team_${Date.now()}`,
-        name: teamName,
-        color: '#' + Math.floor(Math.random()*16777215).toString(16)
-      }]);
-    }
-  };
+		if text:match("^/afk") then
+			-- ??? spam toggle ????
+			if os.clock() - lastAFKToggle > 0.3 then
+				toggleManual()
+				lastAFKToggle = os.clock()
+			end
+			return -- ??????????????????? ??? resetTimer ????????
+		end
 
-  const removeTeam = (id) => {
-    if (window.confirm('ต้องการลบสังกัดนี้?')) {
-      setTeams(prev => prev.filter(team => team.id !== id));
-    }
-  };
+		-- ????????? manualAFK ?????????
+		resetTimer()
+	end
+end
 
-  const deleteSubmission = (id) => {
-    if (window.confirm('ต้องการลบการสมัครนี้?')) {
-      setSubmissions(prev => prev.filter(sub => sub.id !== id));
-    }
-  };
+-- ????????????????????
+LocalPlayer.CharacterAdded:Connect(function(char)
+	char:WaitForChild("HumanoidRootPart")
+	lastPosition = char.HumanoidRootPart.Position
+end)
 
-  const toggleMaintenance = () => {
-    if (isMaintenanceMode) {
-      if (window.confirm('ต้องการเปิดเว็บไซต์และรีเซ็ตข้อมูลการสมัครทั้งหมด?')) {
-        setIsMaintenanceMode(false);
-        setSubmissions([]);
-        alert('เปิดเว็บไซต์แล้ว! ข้อมูลการสมัครถูกรีเซ็ตเรียบร้อย');
-      }
-    } else {
-      if (window.confirm('ต้องการปิดเว็บไซต์เพื่ออัปเดต?')) {
-        setIsMaintenanceMode(true);
-        alert('ปิดเว็บไซต์แล้ว - ผู้ใช้ทั่วไปจะเห็นหน้าอัปเดต');
-      }
-    }
-  };
+-- ????????/?????????????
+RunService.Heartbeat:Connect(function()
+	if manualAFK then return end
 
-  // Maintenance Page
-  if (isMaintenanceMode && !isAdmin) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-12 w-full max-w-2xl text-center">
-          <AlertTriangle className="mx-auto mb-6 text-orange-500" size={80} />
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">เว็บไซต์กำลังอัปเดต</h1>
-          <p className="text-xl text-gray-600 mb-8">โปรดรอสักครู่ จะให้บริการเร็วๆ นี้</p>
-          
-          <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-2xl p-6 mb-6">
-            <p className="text-lg font-semibold text-gray-700 mb-2">เวลาปัจจุบัน (ประเทศไทย)</p>
-            <p className="text-2xl font-bold text-orange-600">{maintenanceTime}</p>
-          </div>
-          
-          <div className="border-t border-gray-200 pt-6">
-            <p className="text-gray-500">
-              ขออภัยในความไม่สะดวก<br />
-              ขอบคุณที่รอคอย
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+	local char = LocalPlayer.Character
+	if char and char:FindFirstChild("HumanoidRootPart") then
+		local pos = char.HumanoidRootPart.Position
+		if lastPosition and (pos - lastPosition).Magnitude > MOVE_THRESHOLD then
+			resetTimer()
+		end
+		lastPosition = pos
+	end
 
-  // Admin Panel
-  if (isAdmin) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-white rounded-3xl shadow-2xl p-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-              <h1 className="text-3xl md:text-4xl font-bold text-purple-600">
-                🔒 ระบบจัดการแอดมิน
-              </h1>
-              <button
-                onClick={toggleMaintenance}
-                type="button"
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition ${
-                  isMaintenanceMode
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-orange-600 text-white hover:bg-orange-700'
-                }`}
-              >
-                <Power size={20} />
-                {isMaintenanceMode ? 'เปิดเว็บ & รีเซ็ต' : 'ปิดเว็บ (อัปเดต)'}
-              </button>
-            </div>
-            
-            {isMaintenanceMode && (
-              <div className="bg-orange-100 border-2 border-orange-300 rounded-2xl p-4 mb-6">
-                <p className="text-orange-800 font-semibold text-center">
-                  ⚠️ เว็บไซต์ปิดให้บริการ - ผู้ใช้ทั่วไปเห็นหน้าอัปเดต
-                </p>
-              </div>
-            )}
-            
-            <div className="flex gap-2 md:gap-4 mb-8 overflow-x-auto pb-2">
-              <button
-                onClick={() => setAdminPage('submissions')}
-                type="button"
-                className={`px-4 md:px-6 py-3 rounded-xl font-semibold transition whitespace-nowrap ${
-                  adminPage === 'submissions'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                <Eye className="inline mr-2" size={20} />
-                ตรวจสอบการสมัคร
-              </button>
-              <button
-                onClick={() => setAdminPage('teams')}
-                type="button"
-                className={`px-4 md:px-6 py-3 rounded-xl font-semibold transition whitespace-nowrap ${
-                  adminPage === 'teams'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                <Settings className="inline mr-2" size={20} />
-                ตั้งค่าสังกัด
-              </button>
-              <button
-                onClick={() => setAdminPage('fields')}
-                type="button"
-                className={`px-4 md:px-6 py-3 rounded-xl font-semibold transition whitespace-nowrap ${
-                  adminPage === 'fields'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                <Plus className="inline mr-2" size={20} />
-                จัดการช่องกรอก
-              </button>
-            </div>
-
-            {adminPage === 'submissions' && (
-              <div>
-                <h2 className="text-2xl font-bold mb-4">การสมัครทั้งหมด ({submissions.length})</h2>
-                {submissions.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">ยังไม่มีการสมัคร</p>
-                ) : (
-                  <div className="space-y-4">
-                    {submissions.map(sub => (
-                      <div key={sub.id} className="border border-gray-200 rounded-2xl p-6">
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h3 className="text-xl font-bold">{sub.username}</h3>
-                            <p className="text-gray-600">สังกัด: {sub.team}</p>
-                            <p className="text-sm text-gray-500">{sub.timestamp}</p>
-                          </div>
-                          <button
-                            onClick={() => deleteSubmission(sub.id)}
-                            type="button"
-                            className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"
-                          >
-                            <Trash2 size={20} />
-                          </button>
-                        </div>
-                        {sub.image && (
-                          <img src={sub.image} alt="Submission" className="w-full max-h-64 object-cover rounded-xl mb-4" />
-                        )}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {Object.entries(sub).map(([key, value]) => {
-                            if (!['id', 'username', 'team', 'image', 'timestamp'].includes(key)) {
-                              return (
-                                <div key={key} className="bg-gray-50 p-3 rounded-lg">
-                                  <span className="font-semibold text-gray-700">{key}: </span>
-                                  <span className="text-gray-600">{value}</span>
-                                </div>
-                              );
-                            }
-                            return null;
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {adminPage === 'teams' && (
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold">จัดการสังกัด/ทีม</h2>
-                  <button
-                    onClick={addTeam}
-                    type="button"
-                    className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 flex items-center gap-2 transition"
-                  >
-                    <Plus size={20} />
-                    เพิ่มสังกัด
-                  </button>
-                </div>
-                {teams.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">ยังไม่มีสังกัด</p>
-                ) : (
-                  <div className="space-y-3">
-                    {teams.map(team => (
-                      <div key={team.id} className="flex justify-between items-center border border-gray-200 rounded-xl p-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-6 h-6 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: team.color }}
-                          />
-                          <span className="font-semibold">{team.name}</span>
-                        </div>
-                        <button
-                          onClick={() => removeTeam(team.id)}
-                          type="button"
-                          className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {adminPage === 'fields' && (
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold">จัดการช่องกรอกข้อมูล</h2>
-                  <button
-                    onClick={addFormField}
-                    type="button"
-                    className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 flex items-center gap-2 transition"
-                  >
-                    <Plus size={20} />
-                    เพิ่มช่องกรอก
-                  </button>
-                </div>
-                {formFields.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">ยังไม่มีช่องกรอกข้อมูล</p>
-                ) : (
-                  <div className="space-y-3">
-                    {formFields.map(field => (
-                      <div key={field.id} className="flex justify-between items-center border border-gray-200 rounded-xl p-4">
-                        <div>
-                          <span className="font-semibold">{field.label}</span>
-                          <span className="text-gray-500 ml-2">({field.type})</span>
-                          {field.required && <span className="text-red-500 ml-2">* บังคับ</span>}
-                        </div>
-                        <button
-                          onClick={() => removeFormField(field.id)}
-                          type="button"
-                          className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Username Page
-  if (currentPage === 'username') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
-          <h1 className="text-4xl font-bold text-center text-indigo-600 mb-2">RTAROBLOXTH</h1>
-          <p className="text-center text-gray-600 mb-8">ระบบลงทะเบียนสมาชิก</p>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                ชื่อในเกม Roblox
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-                placeholder="กรอกชื่อของคุณ"
-              />
-            </div>
-            
-            <button
-              onClick={() => {
-                if (username.trim()) {
-                  setCurrentPage('selectTeam');
-                } else {
-                  alert('กรุณากรอกชื่อผู้ใช้');
-                }
-              }}
-              type="button"
-              className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition"
-            >
-              ถัดไป
-            </button>
-          </div>
-        </div>
-        
-        {showAdminKeyPopup && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
-              <h3 className="text-2xl font-bold text-center text-indigo-600 mb-6">ยืนยันตัวตนแอดมิน</h3>
-              <input
-                type="password"
-                value={adminKeyInput}
-                onChange={(e) => setAdminKeyInput(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 mb-4 outline-none"
-                placeholder="กรอกคีย์แอดมิน"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAdminLogin();
-                  }
-                }}
-              />
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    setShowAdminKeyPopup(false);
-                    setUsername('');
-                    setAdminKeyInput('');
-                  }}
-                  type="button"
-                  className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition"
-                >
-                  ยกเลิก
-                </button>
-                <button
-                  onClick={handleAdminLogin}
-                  type="button"
-                  className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition"
-                >
-                  ยืนยัน
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Select Team Page
-  if (currentPage === 'selectTeam') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-2xl">
-          <h2 className="text-3xl font-bold text-center text-indigo-600 mb-2">เลือกสังกัด/ทีม</h2>
-          <p className="text-center text-gray-600 mb-8">สวัสดี {username}!</p>
-          
-          {teams.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">ยังไม่มีสังกัด กรุณารอแอดมินเพิ่ม</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              {teams.map(team => (
-                <button
-                  key={team.id}
-                  onClick={() => setSelectedTeam(team.id)}
-                  type="button"
-                  className={`p-6 rounded-2xl border-2 transition ${
-                    selectedTeam === team.id
-                      ? 'border-indigo-600 bg-indigo-50'
-                      : 'border-gray-200 hover:border-indigo-300'
-                  }`}
-                  style={{ borderColor: selectedTeam === team.id ? team.color : undefined }}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-lg">{team.name}</span>
-                    {selectedTeam === team.id && <Check className="text-indigo-60
+	if os.clock() - lastActiveTime > AUTO_AFK_DELAY then
+		setAFK(true)
+	end
+end)
